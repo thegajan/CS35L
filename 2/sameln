@@ -1,0 +1,68 @@
+#!/bin/bash
+
+#Gajan Nagaraj
+#904937784
+#Lab 7
+#Assignment 1
+
+#grab the directory to be searched
+dir=$1
+
+#find all the files in dir that are hidden files and sort them
+hidden=`ls -a $dir | grep "^\."`
+#find all the non hidden files that are in dir and sort them
+files=`ls $dir`
+#create and array to store all the regular files 
+#that we will later need to check
+iter=0
+declare -a reg_files
+
+#set the internal file separator to be newlines. 
+#This way we can operate on the output of ls
+IFS=$'\n'
+
+#loop through all the hidden files and add the 
+#ones that are regular files to the array
+for file in $hidden;
+do
+fpath="$dir/$file"
+  if [ ! -r "$fpath" ]
+  then
+    echo "$file is not readable"
+  elif [ -f "$fpath" ]
+  then
+  reg_files[$iter]="$fpath"
+  ((iter++))
+  fi  
+done
+
+#loop through all the non-hidden files and add 
+#the ones that are regular files to the array
+for file in $files;
+do
+fpath="$dir/$file"
+  if [ ! -r "$fpath" ]
+  then
+    echo "$file is not readable"
+  elif [ -f "$fpath" ]
+  then
+  reg_files[$iter]="$fpath"
+  ((iter++))
+  fi  
+done
+
+#loop through the array and compare the files
+#if the files are the same then we change it into 
+#a hard link
+for (( x=0; x<$iter; x++ ))
+do
+  for (( y=x+1; y<$iter; y++ ))
+  do
+    cmp -s "${reg_files[$x]}" "${reg_files[$y]}"
+    if [ $? -eq 0 ]
+    then
+      ln -Pf "${reg_files[$x]}" "${reg_files[$y]}"
+      reg_files[$y]=reg_files[$x] 
+    fi 
+  done
+done

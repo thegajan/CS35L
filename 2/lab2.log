@@ -1,0 +1,362 @@
+Gajan Nagaraj
+904937784
+Lab 7
+Assignment 2
+
+We start out by checking the output of the locale command to check that we are 
+in the standard C or POSIX locale. The output of the locale command was not 
+LC_CTYPE="C" or LC_CTYPE="POSIX". Thus I had to run the command 
+"export LC_ALL='C'" to change the locale to standard C.
+
+We next create the file "words" that contain a sorted list of English words. 
+We create the file by sorting the words file in /usr/share/dict/words and 
+pipping that to a file name "words" in the working directory. 
+This is done by "sort /usr/share/dict/words > words".  
+
+Next we download the assignment HTML page. This is done using wget:
+wget http://web.cs.ucla.edu/classes/fall18/cs35L/assign/assign2.html
+
+Describing command output on HTML file:
+1. tr -c 'A-Za-z' '[\n*]' < assign2.html
+This command outputs all the lines with A-Z and a-z character in them. 
+If the line does not have one of those characters, then an newline is printed. 
+Essentially, thsi command takes the complement of the set 'A-Za-z' and 
+replaces those characters with a newline. This means that all non letter 
+characters are replaced with newlines for all the non letter characters 
+in the line.
+
+2. tr -cs 'A-Za-z' '[\n*]' < assign2.html
+This command does the same thing as the command we just ran except the -s 
+flag sqeezes the output by replacing each input sequence of a repeated 
+character with a single occurrence of that character. We notice that the 
+output of the command is just ever word in the file on a newline. 
+All the newlines that we observed in the previous output were deleted 
+by the use of the -s flag.  
+
+3. tr -cs 'A-Za-z' '[\n*]' < assign2.html | sort
+This command does exactly what it did before except that it is pipping the 
+output to the sort command. This means that the output of the command is 
+the output of the previous command, but sorted using the ASCII standard.
+
+4. tr -cs 'A-Za-z' '[\n*]' < assign2.html | sort -u
+This command outputs outputs the same list of sorted words that the previous 
+command issued except that there are no duplicates in the output this time. 
+This is because the -u command removes any duplicate words in the listing.
+
+5. tr -cs 'A-Za-z' '[\n*]' < assign2.html | sort -u | comm - words
+This command reads the output of the sorted tr command and compares it to the 
+words file. The output of this command are three columns. One of the columns 
+displays everything that is unique to the output of the previous command. 
+The second column are the lines that are unique to the contents of the "words" 
+file. The third column displays the lines that are common to both the "words" 
+file and the output of the previous command. 
+
+6. tr -cs 'A-Za-z' '[\n*]' < assign2.html | sort -u | comm -23 - words
+This command does exactly the same thing as the previous one except that the 
+-23 flag suppresses the second and third columns from the output. This means 
+that the output of this command is just the first column which displays the 
+sorted words that are unique to the standard input. 
+
+Building Hawaiian Word Script:
+To begin we must first start by downloading the html page containing the 
+table of Hawaiian words. This is done using wget:
+wget http://mauimapp.com/moolelo/hwnwdseng.htm
+
+We start by extracting all the <td></td> from the table in the html. 
+We can do this using grep:
+grep -oE '<td>.+<\/td>' |
+
+We pipe the output of this to the following command:
+sed '1~2d' | 
+
+This command takes the English and Hawaiian words and deletes every other line 
+(the English words). Thus we are only left with the Hawaiian words in the 
+<td></td> tags. We pipe the output of this to:
+tr "\`A-Z" "\'a-z" |
+
+This command takes all instances of ` (ASCII grave accent) and replaces it 
+with ' (ASCII apostrophe). It also replaces all the upper case letters with 
+the lower case version of the letter. We pip the output of that to:
+sed 's|<td>||g;s|<\/td>||g;s|<u>||g;s|</u>||g' |
+
+This command takes the output of the previous command and replaces all the 
+remaining HTML tags with blanks. This way we are only left over with the 
+Hawaiian words. We pipe this to:
+sed -E "s/,\s|\s/\n/g" |
+
+This command takes the output of the previous command and replaces all the 
+commans and spaces with newline. This way words seperated by spaces and commas 
+are treated as different words as per the spec. Next we must filter all the 
+words that do not have Hawaiian letters. We do that with: 
+grep "^[pk\'mnwlhaeiou]\{1,\}$" |
+
+This command uses grep to only select the words that contain the valid 
+Hawaiian characters. Finally, we pipe this to sort to sort all the words and 
+remove all duplicates using the -u flag:
+sort -u
+
+In order to run buildwords, we must change the execution 
+permissions on this file:
+chmod u+x buildwords
+
+We can run this shell script on the html file of the hawaiian words and pipe 
+the output to another file to collect all the hawaiian words.
+./buildwords < hwnwdseng.htm > hwords
+
+Next we modify the last shell command shown in the assingment so that it 
+checks the spelling of Hawaiian rather than English. We also make sure to 
+change upper case words to lower case.
+tr '[:upper:]' '[:lower:]' < assign2.html | tr -cs "pk\'mnwlhaeiou" '[\n*]' 
+| sort -u | comm -23 - hwords
+
+Next we must count the number of mispelled words in English and Hawaiian on 
+the assignment page.
+Mispelled Hawaiian Words:
+tr '[:upper:]' '[:lower:]' < assign2.html | tr -cs "pk\'mnwlhaeiou" '[\n*]' 
+| sort -u | comm -23 - hwords | wc -w
+
+There are 197 mispelled Hawaiian words on the assignment page.
+Mispelled English Words:
+tr '[:upper:]' '[:lower:]' < assign2.html | tr -cs 'A-Za-z' '[\n*]' 
+| sort -u | comm -23 - words | wc -w
+
+There are 38 mispelled English words on the assignment page.
+
+To find the words that are just mispelled in English and Hawaiian we pipe the 
+mispelled English and Hawaiian words to a file and compare the outputs.
+tr '[:upper:]' '[:lower:]' < assign2.html | tr -cs "pk\'mnwlhaeiou" '[\n*]' 
+| sort -u | comm -23 - hwords > mishwords
+tr '[:upper:]' '[:lower:]' < assign2.html | tr -cs 'A-Za-z' '[\n*]' 
+| sort -u | comm -23 - words > misewords
+comm -23 misewords mishwords
+comm -13 misewords mishwords
+
+Words mispelled in just English:
+basedefs
+buildwords
+charset
+cmp
+ctype
+doctype
+eggert
+eword
+halau
+href
+htm
+html
+http
+hwnwdseng
+hword
+hwords
+idx
+lau
+linux
+ndash
+onlinepubs
+opengroup
+posix
+sameln
+seasnet
+td
+toc
+usr
+utf
+vandebogart
+wget
+wiki
+wikipedia
+
+Words Mispelled in just Hawaiian:
+'
+a
+'a
+ail
+ain
+ainin
+ake
+al
+ale
+alen
+ali
+all
+ameln
+amine
+amp
+ample
+an
+aph
+aphi
+api
+apo
+awk
+e'
+ea
+ee
+ein
+el
+em
+ema
+emainin
+emen
+emo
+emp
+en
+ene
+enien
+ep
+epa
+epai
+epla
+epo
+ewo
+h
+'h
+h'
+ha
+han
+hap
+happene
+hawaiian
+he
+hea
+hei
+hell
+hem
+hen
+hi
+hin
+ho
+homewo
+houl
+how
+howe
+hown
+hwnw
+hwo
+ia
+ial
+ie
+ii
+ile
+ilen
+ili
+imila
+imme
+imp
+imple
+implemen
+in
+ina
+inpu
+ion
+iona
+ional
+ione
+iou
+ip
+iple
+k
+keep
+kin
+l
+lan
+le
+lea
+lem
+len
+li
+like
+line
+link
+link'
+linu
+ln
+lo
+lowe
+m
+m'
+mail
+man
+me
+men
+mi
+ml
+ml'
+mo
+mp
+mul
+n
+n'
+name
+namin
+ne
+nee
+nmen
+no
+non
+nu
+num
+o
+ollowin
+olumn
+om
+oma
+ome
+omm
+omma
+omman
+on
+on'
+one
+onl
+onlinepu
+oo
+ook
+op
+ope
+open
+ophe
+ou
+ou'
+oun
+oup
+own
+p
+paul
+pe
+pe'
+pell
+pelle
+pellin
+people
+plea
+pu
+u
+ue
+ui
+uil
+ula
+ule
+ume
+umen
+ump
+un
+uni
+unna
+unnin
+upli
+uppe
+uppo
+w
+wa
+wan
+we
+wh
+wha
+whe
+whi
+who
+wi
+wikipe
+wo
+

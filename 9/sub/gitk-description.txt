@@ -1,0 +1,24 @@
+Gajan Nagaraj
+904937784
+Lab 7
+Assignment 9
+
+There are 5 subwindows displayed by gitk.
+Top Left:
+This subwindow displays the history of the repository in a tree like structure. Here we can see all the commits, merges, and
+branches. Next to every commit is the commit message.
+
+Top Middle:
+This subwindow shows the person who made the commit and their email.
+
+Top Right:
+This window shows the time and date of the commit.
+
+Bottom Left:
+This subwindow contains detailed information about the commit. It also shows the diff for the file displaying all the changes that
+have been made to the file for that specific commit. We are given information about what commit came before and what comes after.
+
+Bottom Right:
+This subwindow displays all the files that have been changed in the selected commit. When we click on the different files, we can
+see the diffs before and after the commit. This is for patch mode. When we toggle tree mode, we can see a snapshot of the repository
+during that point.

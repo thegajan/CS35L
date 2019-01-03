@@ -1,0 +1,85 @@
+Gajan Nagaraj
+904937784
+Assignment 1
+
+Exercise 1.1:
+1. emacs exer1.html Enter
+2. C-s HTML Enter
+3. C-s scavenger Enter M-b
+4. C-s self-referential Enter M-b M-b
+5. C-s arrow Enter M-b
+6. C-e
+7. c-a
+8. The above two tasks can be completed using the emacs shortcuts C-a and C-e which move to the beginning and end of lines respectively.
+9. No
+10. C-x C-c
+
+Exercise 1.2:
+1. emacs exer2.html Enter
+2. M-g M-g 18 Enter C-S-Backspace
+3. C-s DELETE-ME DELETE-ME DELETE-ME Enter C-S-Backspace
+4. C-s https://en.wikipedia.org/wiki/HTML_comment#Comments C-s C-p C-a C-Spacebar C-n C-n C-n C-w
+5. C-s <! C-s C-b C-b M-z > Enter
+C-s <! C-a C-Spacebar C-n C-n C-n C-n C-w
+C-s <! C-S-Backspace
+
+Exercise 1.3:
+1. emacs exer3.html Enter
+2. C-s Assignment 1 Backspace 42
+C-s Assignment 1 Backspace 42
+3. C-s UTF-8 M-% US-ASCII Enter y
+4. C-s [^[:ascii:]] M-% Enter !
+5. C-s </ol> Enter Enter
+6. C-x C-s C-x C-c
+
+Exercise 1.4:
+1. cat exer2.html exer2.diff >exer4.html Enter
+2. emacs exer4.html Enter
+3. M-> Backspace C-Spacebar C-a C-f M-g M-g 395 Enter C-e Enter C-y
+4. M-> C-r <! C-r C-Spacebar C-s -> C-s M-w M-g M-g 387 C-y Enter C-p C-p Delete C-p Delete C-p Delete
+M-> C-r <! C-r C-r C-Spacebar -> M-w M-g M-g 383 Enter C-s g Enter C-y
+M-> C-r <! C-r C-r C-r C-Spacebar C-s -> M-w M-g M-g 338 Enter C-y Enter C-a Delete C-p Delete
+M-> C-r <! C-r C-r C-r C-r C-Spacebar C-e M-w M-g M-g 126 Enter C-y Enter
+M-> C-r <! C-r C-r C-r C-r C-r C-Spacebar C-s -> M-w M-g M-g 18 Enter C-y Enter
+5. M-g M-g 402 Enter C-Spacebar M-> Delete
+6. C-x u
+7. M-g M-g 402 Enter <!-- M-% --> Enter --><!-- Enter y y y y M-> -->
+8. M-< C-s <ol>
+Found 7 instances of <ol> tag.
+M-< M-% <ol> Enter <oL> Enter !
+9. Diff not visible in html viewed in firefox. diff -u exer1.html exer4.html >exer4.diff
+
+Exercise 1.5:
+1. emacs Enter M-x make-directory Enter junk Enter
+2. M-x dired Enter junk Enter C-x C-f hello.c Enter C-y C-x C-s
+3. M-x compile Enter gcc -o hello-out hello.c Enter
+4. C-x b hello-out Enter C-u M-! ./hello-out Enter
+5. C-Spacebar M-> M-w C-Spacebar
+#include <stdio.h>
+int
+main (void)
+{
+  char n = '\n', b = '\\', q = '"';
+  char const *p = "#include <stdio.h>%cint%cmain (void)%c{%c  char n = '%cn', b = '%c%c', q = '%c';%c  char const *p = %c%s%c;%c  printf (p, n, n, n, n, b, b, b, q, n, q, p, q, n, n, n, n);%c  return 0;%c}%c";
+  printf (p, n, n, n, n, b, b, b, q, n, q, p, q, n, n, n, n);
+  return 0;
+}
+
+Exercise 1.6:
+1. C-x b
+2. (random "904-937-784") C-j eval-print-last-sexp
+629282987740444350
+3. (setq x (random)) C-j
+-920673249741531268
+(setq y (random)) C-j
+1333291559731943445
+4. (* x y) C-j
+-2028150732369556180
+The result of the multiplication is incorrect.
+5. M-: (*x y)
+-2028150732369556180 (#o217324372361612406454, #x23da8fa78e2a0d2c)
+The output is different because it includes additional values (hexadecimal and octadecimal). values.
+6. The two integers are not truly random in the mathematical sense. This is because in order for the computer to generate a random number it must follow some sort of algorithm. This means that the number generated will be psuedo random but not random in the mathematical sense.
+7. If (random) is truly random the probability that the two-variable product mentioned above is mathematically incorrect is 1.
+We can calculate this because we know that the x*y < z where z is the overflow. The integral of y=z/x from 1 to z is is z*log(z). The probability that the two-variable product will not result in an overflow is found by dividing the integral of y=z/x by the possible products. This is given as: z*log(z)/z^2=log(z)/z. The probability of the two products not overflowing is 1-log(z)/z, which is 1 as z approaches infinity. 
+

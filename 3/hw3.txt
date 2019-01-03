@@ -1,0 +1,50 @@
+Gajan Nagaraj
+904937784
+Lab 7
+HW #3
+
+Q1. We can time both the unpatched version and the patched version of the ls to
+see what takes more time using the "time" command. We notice that there is
+actually not measuarable difference in the time it takes to run the function.  
+
+However, there is an increase in usage performance in the sense that the user
+can get the output that he/she desires.
+
+Q2. This patched version of Coreutils should not introduce any additional
+problems with your application if the application runs on a system that is
+POSIX.1-2008 compatible. However, the company should watch out for any bugs that
+could be introduced in tests/ls/a-option.sh and tests/local.mk.  
+
+Q3. When this script is envoked on an empty file like /dev/null (python
+randline.py /dev/null) then we get the
+following error:
+Traceback (most recent call last):
+  File "randline.py", line 70, in <module>
+    main()
+  File "randline.py", line 64, in main
+    sys.stdout.write(generator.chooseline())
+  File "randline.py", line 34, in chooseline
+    return random.choice(self.lines)
+  File "/usr/lib64/python2.7/random.py", line 274, in choice
+    return seq[int(self.random() * len(seq))]  # raises IndexError if seq is
+empty
+IndexError: list index out of range
+
+This happens because in the code we must specify numlines. If we do not specify
+that the number of lines is zero in this null file then the program will attempt
+to select a random line from a file that has no line. The code only checks if
+the number of lines is less than zero:
+if numlines < 0:
+
+Thus, if the number of lines is zero, then the code will still execute and
+result in undefined behavior. 
+
+Q4. When the script is invoked with Python 3 instead of Python 2 we get the
+following error:
+  File "randline.py", line 65
+    except IOError as (errno, strerror):
+                      ^
+SyntaxError: invalid syntax
+
+This happens because Python 3 merges IOError with OSError. Thus to be compatible
+with Python 3, this change must be reflected in the code.

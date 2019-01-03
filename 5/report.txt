@@ -1,0 +1,171 @@
+Gajan Nagaraj
+904937784
+Lab 7
+Assignment 5
+
+We begin this lab by writing two C files: tr2b and tr2u. These files are a reimplementation of tr (without the options). Our goal is
+to use getchar and putchar in tr2b, and read and write in tr2u. We then measure which ran faster to see if using buffered or
+unbuffered input is faster.
+
+I made tr2b and tr2u as per the spec. Now we must test it as per the spec. We need to create a large file (5,000,000 bytes). We do
+this by:
+head --bytes=5000000 /dev/urandom > big.txt
+
+Next we use strace to compare the system calls issued by tr2b and tr2u. 
+First we test the two commands when copying one file to another:
+We start with tr2b:
+strace -c ./tr2b "abc" "xyz" < big.txt > tr2b_out.txt
+
+This gives us the following output:
+% time     seconds  usecs/call     calls    errors syscall
+------ ----------- ----------- --------- --------- ----------------
+ 56.98    0.002256           4       611           write
+ 32.86    0.001301           2       613           read
+  2.93    0.000116          13         9           mmap
+  2.02    0.000080          20         4           mprotect
+  1.47    0.000058          15         4           fstat
+  1.19    0.000047          47         1           munmap
+  0.91    0.000036          18         2           open
+  0.68    0.000027          27         1         1 access
+  0.33    0.000013          13         1           execve
+  0.30    0.000012           6         2           close
+  0.18    0.000007           7         1           arch_prctl
+  0.15    0.000006           6         1           brk
+------ ----------- ----------- --------- --------- ----------------
+100.00    0.003959                  1250         1 total
+
+We then repeat this for tr2u:
+strace -c ./tr2u "abc" "xyz" < big.txt > tr2u_out.txt
+
+This gives us the following output:
+% time     seconds  usecs/call     calls    errors syscall
+------ ----------- ----------- --------- --------- ----------------
+ 56.99   48.326340          10   5000000           write
+ 43.01   36.466150           7   5000002           read
+  0.00    0.000021          21         1         1 access
+  0.00    0.000017           2         7           mmap
+  0.00    0.000014           7         2           open
+  0.00    0.000012           6         2           fstat
+  0.00    0.000012          12         1           execve
+  0.00    0.000005           3         2           close
+  0.00    0.000005           5         1           brk
+  0.00    0.000000           0         4           mprotect
+  0.00    0.000000           0         1           munmap
+  0.00    0.000000           0         1           arch_prctl
+------ ----------- ----------- --------- --------- ----------------
+100.00   84.792576              10000024         1 total
+
+We can also check to make sure that these files are identical, thus both versions are performing as expected:
+diff tr2b_out.txt tr2u_out.txt -s
+Files tr2b_out.txt and tr2u_out.txt are identical
+
+As we can see from the output of strace, tr2u takes 85 seconds to run while tr2b only takes 0.004 seconds. From this we can conclude
+that it is better to use a buffered I/O over and unbuffered one. With a unbuffered I/O more system calls are made, and this takes a
+lot more time.
+
+Next, we test the two commands when copying a file to our terminal:
+We start with tr2b:
+strace -c ./tr2b "abc" "xyz" < big.txt
+
+This gives us the following output:
+% time     seconds  usecs/call     calls    errors syscall
+------ ----------- ----------- --------- --------- ----------------
+ 94.23    0.116376           6     19830           write
+  5.49    0.006782          11       613           read
+  0.08    0.000102          11         9           mmap
+  0.06    0.000070          18         4           mprotect
+  0.05    0.000059          15         4           fstat
+  0.03    0.000037          19         2           open
+  0.02    0.000026          26         1         1 access
+  0.02    0.000024          24         1           munmap
+  0.01    0.000018           9         2           close
+  0.01    0.000007           7         1           arch_prctl
+  0.00    0.000000           0         1           brk
+  0.00    0.000000           0         1           execve
+------ ----------- ----------- --------- --------- ----------------
+100.00    0.123501                 20469         1 total
+
+We repeat this for tr2u:
+strace -c ./tr2u "abc" "xyz" < big.txt
+
+This gives us the following output:
+% time     seconds  usecs/call     calls    errors syscall
+------ ----------- ----------- --------- --------- ----------------
+ 56.81   48.459425          10   5000000           write
+ 43.19   36.840756           7   5000002           read
+  0.00    0.000090          13         7           mmap
+  0.00    0.000084          21         4           mprotect
+  0.00    0.000037          19         2           open
+  0.00    0.000021          21         1           munmap
+  0.00    0.000017          17         1         1 access
+  0.00    0.000016           8         2           fstat
+  0.00    0.000014          14         1           brk
+  0.00    0.000014          14         1           execve
+  0.00    0.000011           6         2           close
+  0.00    0.000007           7         1           arch_prctl
+------ ----------- ----------- --------- --------- ----------------
+100.00   85.300492              10000024         1 total
+
+We can see that even for copying as file to the terminal, tr2b perfoms much better than tr2u. It takes only .1 seconds to execute
+while tr2u takes 85 seconds. We also notice that the unbuffered I/O makes more system calls. This further proves that it is better
+to use a buffered I/O.
+
+Next we use the time command to measure how much faster one program is compared to the other when copying the same amount of data:
+
+time ./tr2b 'abc' 'xyz' < big.txt > tr2b_out.txt
+real 0m0.521s
+user 0m0.442s
+sys 0m0.035s
+
+time ./tr2u 'abc' 'xyz' < big.txt > tr2u_out.txt
+real 0m17.632s
+user 0m2.133s
+sys 0m15.407s
+
+As before, we can very clearly see that the buffered I/O in tr2b outperforms the unbuffered I/O in tr2u.  
+
+Homework:
+First we use the time command to test the overall performance of sfrob, sfrobu, sfrobs, sfrobu -f, and sfrobs -f:
+sfrob:
+time ../4/sfrob < big.txt | od -ta
+real    0m0.006s
+user    0m0.004s
+sys     0m0.005s
+
+sfrobu:
+time ./sfrobu < big.txt | od -ta
+real    0m16.225s
+user    0m5.398s
+sys     0m11.248s
+
+sfrobs:
+time ./sfrobs < big.txt | od -ta
+real    0m9.605s
+user    0m3.497s
+sys     0m1.248s
+
+sfrobu -f:
+time ./sfrobu < big.txt -f | od -ta
+real    0m15.828s
+user    0m5.610s
+sys     0m11.498s
+
+sfrobs -f:
+time ./sfrobs < big.txt -f | od -ta
+real    0m9.432s
+user    0m3.498s
+sys     0m1.224s
+
+Here we can clearly see that sfrobu took the most amount of time to run. sfrobs performed better than sfrobu, but still worse than
+sfrob. sfrob performed the best because it had a buffered I/O. We can see that the unbuffered I/O performed much slower regardless
+of the flag.
+
+Next we estimate the number of comparisons as a function of the number of input lines for sfrobu:
+Number of lines:  Number of Comparisons:
+24                75
+375               3289
+19473             357721
+38841             797943
+
+From this data, we can estimate the number of comparisons as a function of lines:
+# of comparison = 20.41(# of lines) - 9878

@@ -1,0 +1,15 @@
+#!/bin/bash
+
+#Gajan Nagaraj
+#904937784
+#Lab 7 
+#Assignment 2
+
+grep -oE '<td>.+<\/td>' | 
+sed '1~2d' | 
+tr "\`A-Z" "\'a-z" | 
+sed 's|<td>||g;s|<\/td>||g;s|<u>||g;s|</u>||g' | 
+sed -E "s/,\s|\s/\n/g" | 
+grep "^[pk\'mnwlhaeiou]\{1,\}$" | 
+sort -u
+

@@ -1,0 +1,59 @@
+Gajan Nagaraj
+904937784
+Assignment 1
+
+
+
+1. The shell command "man -k word" where "word" is the keyword being searched prints all the commands that have "word" in their man page. The solution was found using the hint.
+
+2. The mv is located in /usr/local/cs/bin/ and sh is located in /usr/bin/. This was found by using the "which" command (which mv and which sh).
+
+3. The executable programs that are two characters long and end in r are:
+pr - convert text files for printing
+tr - translate or delete characters
+The programs were found using "find /usr/bin/ -name '?r'". Used man pages to find out what each program did.
+
+4. When you execute the command named by the symbolic link /usr/bin/emacs, /etc/alternatives/emacs is executed. This was found by "ls /usr/bin -l | grep emacs".
+
+5. The version number of the /usr/bin/gcc program is 4.8.5. The version number of the plain gcc program is 8.2.0. This was found by doing /usr/bin/gcc --version and /usr/local/cs/bin/gcc --version. They are different copies of gcc located in different directories and can therefore have different version numbers.
+
+6. In class we learned that u stands for user, so u+sx sets the user ID on execution and gives the user execution permission. We also learned that o stands for other, so o-w means remove write permission for others on the file. Information for this question was found in the slides.
+
+7. Using "find . -type d -ctime -28" from /usr/local/cs and /usr/local/ the directories I found are:
+/bin
+/.del
+/coreutils-8.30
+/ocaml-4.07.0
+/cs
+/.snapshot
+/share
+/jdk-11
+/gdb-8.2
+The -type d option only checks for directories and -28 checks for 4 weeks. I found this on the man pages.
+
+8. There are 252 symbolic link files in the same directory as find. I first found what directory find was in using "which find". I then found out how many symbolic links by using "find /usr/bin/ -type l | wc". This finds all the symbolic link files and then pipes it to wc which counts the number of newlines.
+
+9. The oldest file in the directory is librom1394.so.0.3.0. This was found by doing "ls -lt" in the /usr/lib64 directory.
+
+10. The locale command gets its data from the environmental variables. This was found by looking at the man page for locale.
+
+11. The emacs commands that have downcase in their name are:
+downcase-dwim
+downcase-region
+downcase-word
+This was done by launching emacs and typing C-h a downcase.
+
+12. C-M-r does incremental search backward for regular expression.
+C-M-v scroll next window upward ARG lines.
+This was found by doing C-h b to find all the keybinds and their functions.
+
+13. C-g quits a command before it finishes executing. It sets the quit-flag to t the moment that the bind is pressed. I found this by doing C-h b and C-s to find all the keybinds and search.
+
+14. The emacs function yank reinserts the last stretch of killed text. You can easily invoke this using C-y. I found this by typing C-h b yank.
+
+15. The difference between ls -l and dired are the first 3 lines of the output. Dired outputs:
+total used in directory 294900 available 13089376
+dr-xr-xr-x. 2  root root     69632 Oct  2 15:23 .
+drwxr-xr-x. 15 root root      4096 May 22 07:49 ..
+So dired also outputs the parent and current working directory whereas ls -l does not.
+

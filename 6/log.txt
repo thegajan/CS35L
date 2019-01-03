@@ -1,0 +1,73 @@
+Gajan Nagaraj
+904937784
+Lab 7
+Assignment 6
+
+We want to use the version of coreutils sort that is installed in /usr/local/cs/bin/sort. Because of this we must set our PATH to 
+point to this directory:
+export PATH=/usr/local/cs/bin/
+
+Then we want to check the version of sort that we are using:
+sort --version
+
+This outputs the following:
+sort (GNU coreutils) 8.30
+Copyright (C) 2018 Free Software Foundation, Inc.
+License GPLv3+: GNU GPL version 3 or later <https://gnu.org/licenses/gpl.html>.
+This is free software: you are free to change and redistribute it.
+There is NO WARRANTY, to the extent permitted by law.
+
+Written by Mike Haertel and Paul Eggert.
+
+Next, we are have to generate a file containing 2^24 random single-precision floating point numbers, one per line with no white
+space:
+od -An -t fF -N $(((2**24)*4)) < /dev/urandom | tr -s ' ' '\n' > float.txt
+
+Here we use the od command to generate random single-precision floating point numbers. The -An makes sure that we do not RADIX
+format the file, the -t fF specifies that we want single precision floats, and the -N specifies the number of bytes to dump 
+(float is four bytes) pipe this output to the tr command so that we can format the output to one per line with no white space. 
+
+Inspecting this file, we notice that there is newline present at the top of the file. This is because there was a newline present at
+the start of the file before piping the data in. We remove this starting newline so that there are not more newlines present.
+
+Now we can use time -p to sort the sort -g command:
+time -p sort -g float.txt > /dev/null
+
+We get the following output:
+real 35.89
+user 198.27
+sys 0.82
+
+Next we time the sort -g with the additionally --parallel flag to test how the sort function perfroms with different number of
+threads to run in parallel. Using man sort, we can see that the --parallel flag has the following behavior:
+--parallel=N
+              change the number of sorts run concurrently to N
+
+We then vary the number of threads we sort the file with and time it:
+First we time the sort command with 1 thread:
+time -p sort -g --parallel=1 float.txt > /dev/null
+real 183.59
+user 183.21
+sys 0.38
+
+Next we run the sort command with 2 threads:
+time -p sort -g --parallel=2 float.txt > /dev/null
+real 96.70
+user 183.35
+sys 0.58
+
+We run the sort command with 4 threads:
+time -p sort -g --parallel=4 float.txt > /dev/null
+real 57.47
+user 195.82
+sys 0.58
+
+Lastly, we repeat this command for 8 threads:
+time -p sort -g --parallel=8 float.txt > /dev/null
+real 36.44
+user 199.63
+sys 0.81
+
+From this we can see that the time the sort command takes decreases as we increase the number of threads used (real time decreases).
+This makes sense because if we have more threads to parallelize the sort, then we can finish it faster. However, we have to be 
+careful to not use too many threads as we will get diminishing returns an possibly worse performance because there is more overhead.

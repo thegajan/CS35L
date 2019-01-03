@@ -1,0 +1,5 @@
+2018-11-02  Gajan Rathnam Nagaraj  <gajan@lnxsrv09.seas.ucla.edu>
+
+	* timespec.h (timespec_cmp):
+	There is an integer overflow issue for edge case inputs to this function. We change this so that we do a direct comparison of the inputs and return 1, 0, or -1.
+

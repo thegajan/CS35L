@@ -1,0 +1,59 @@
+Gajan Nagaraj
+904937784
+Lab 7
+Assignment 8
+
+After setting up the beagle bone, we begin by installing Openssh.
+sudo apt-get install openssh-server
+sudo apt-get install openssh-client
+Installs both openssh for both client and server.
+
+Our goal is to use OpenSSH to establish trusted connections among your teams' hosts.
+Next we generate public and private keys:
+ssh-keygen
+
+We then proceed to make an account for the client so that they can login:
+sudo useradd –d /home/client –m client
+sudo passwd client
+
+Then we check to verify that we can access this new user by sshing in:
+ssh client@192.168.7.2
+This worked, thus the new user is created an can be accessed via ssh.
+
+We then make the .ssh directory for the new user:
+cd /home/client
+sudo mkdir .ssh
+This folder will hold all the ssh configuration files, and will allow us to set specific ssh configurations for only this user.
+
+And we change the ownership of the directory:
+sudo chown –R client .ssh
+sudo chmod 700 .ssh
+
+Next we proceed to setup the client. We already generated the public and private keys. Next we copy the public key to the server for
+key-based authentication:
+ssh-copy-id –i guest@10.97.85.187
+This allows us to ssh and have key-based authentification meaning that we do not have to enter in a password for guest assuming our
+public key exists on this server.
+
+We then add private key to authentication agent (ssh-agent):
+eval `ssh-agent -s`
+ssh-add
+
+Additionally, we must set password authentification to no on the server:
+emacs /etc/ssh/sshd_config
+changed PasswordAuthentification to no
+
+Now we ssh into the server again and check if it still requires us to enter a password:
+ssh guest@10.97.85.56
+
+We did not have to enter a password when sshing. This is the desired output.
+
+We next want to X forward a session from the server:
+ssh -X guest@10.97.85.56
+
+I tried X-forwarding firefox from the server and recieved a browser window on the client. This means that X-forwarding indeed
+worked.
+
+When checking whether ssh -X and ssh -Y differ in behavior when using port forwarding I found that both do X-forwarding, but the -X
+option is the secure option while -Y is not secure. The -X option treats the client as an untrusted client, while the -Y option
+treats the client as a trusted client (can execute commands that might be security threats).

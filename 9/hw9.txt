@@ -1,0 +1,99 @@
+Gajan Nagaraj
+904937784
+Lab 7
+Assignment 9
+
+1. Created a file called hw9.txt.
+
+2. I checked out version 3.0 of Diffutils from my repository into a branch called quote:
+git checkout v3.0 -b quote
+M       src/cmp.c
+M       src/diff.c
+M       src/diff3.c
+M       src/dir.c
+M       src/sdiff.c
+M       src/util.c
+Switched to a new branch 'quote'
+
+3. I installed my changes into the branch using the patch command with quote-3.0-patch.txt as the input:
+patch < quote-3.0-patch.txt
+
+The patch was applied.
+
+4. I read the GNU Emacs manual to learn how to use the add-change-log-entry-other-window function.
+
+5. I use add-change-log-entry-other-window to add a ChangeLog entry for the following files:
+src/cmp.c
+src/diff.c
+src/diff3.c
+src/dir.c
+src/sdiff.c
+src/util.c
+
+I formatted my ChangeLog as follows:
+2018-12-07  Gajan Rathnam Nagaraj  <gajan@lnxsrv09.seas.ucla.edu>
+
+        * src/util.c: Replaced ` with ' in character string constants.
+
+        * src/sdiff.c: Replaced ` with ' in character string constants.
+
+        * src/dir.c: Replaced ` with ' in character string constants.
+
+        * src/diff3.c: Replaced ` with ' in character string constants.
+
+        * src/diff.c: Raplaced ` with ' in character string constants.
+
+        * src/cmp.c: Replaced ` with ' in character string constants.
+
+I opened the files I mentioned above and used C-x 4 a to input the entry.
+
+6. Next I commit the changes that I made to the new branch. I do this by first staging all the files, and then committing them with
+the message being the ChangeLog entry:
+git add .
+git commit -F ChangeLog
+
+7. I then generate a patch file using git format-patch. I do this by finding the commit hash for my most recent commit and then
+calling the git format-patch command using it:
+git log
+git format-patch -1 eb98f413041ffd1b1cf30c614e6f5d17d9ddba4f --stdout > formatted-patch.txt
+
+8. My partner is Justin Chang. I scpd his file to the server to test. I now verify that my partners patch works:
+git checkout v3.0 -b temp
+git am < formatted-patch-jc.txt
+Applying: 2018-12-05 Justin Chang <justinch@lnxsrv03.seas.ucla.edu>
+
+./bootstrap
+./configure
+make
+make check
+
+All of this passed without an errors.
+
+9. I then verify that the ChangeLog entry works, by running the command "make distdir":
+makde distdir
+
+I notice that this make a dirctory called diffutils-3.0.1-cdd1. I then inspect the ChangeLog in this directory and notice that this
+is my partners patch:
+2018-12-07  Justin Chang  <justinch@lnxsrv03.seas.ucla.edu>
+
+2018-12-05 Justin Chang <justinch@lnxsrv03.seas.ucla.edu>
+    * src/util.c: updates to make sure ' instead of `.
+
+    * src/sdiff.c: updates to make sure ' instead of `.
+
+    * src/dir.c: updates to make sure ' instead of `.
+
+    * src/diff3.c: updates to make sure ' instead of `.
+
+    * src/diff.c: updates to make sure ' instead of `.
+
+    * src/cmp.c: updates to make sure ' instead of `.
+
+Thus I can conclude that the patch was successful.
+
+10. I now clone the copy of GNU Emacs git repository's master branch:
+git clone ~eggert/src/gnu/emacs
+Initialized empty Git repository in /w/home.20/ms/ugrad/gajan/Desktop/cs35L/9/emacs/.git/
+
+I then entered the repository and ran the gitk command. This opened up a graphical window. I took a screenshot of the newest merge
+that is not newer than 2015-01-25 and briefly described the roles of subwindows. 

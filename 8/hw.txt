@@ -1,0 +1,25 @@
+Gajan Nagaraj
+904937784
+Lab 7
+Assignment 8
+
+1. Yes. If other teams really had been observing all the bytes going across the network, the network would still be secure. If the
+teams were to observe the data across the network, they would not be able to decrypt it because the data is encrypted using our
+public key before being transferred across the network. Other groups do not have access to these keys because they were generated in
+private and thus could not decrypt the message.
+
+1.1. If the other teams had tapped our keystrokes the network may or may not still be secure. It might be secure in the sense that
+they can collect passwords and later use them to exploit our systems. If we did not setup key-based encryption and turn off password
+authentification, we would still have to enter the athentification private key password. The other teams could steal this password
+and gain access to the network. However, if we instead enable key-based authentification and disable password authentification, we
+would not need to enter a password when sshing and the network would still be secure.
+
+1.2. If you are booting off USB and you assume the other teams temporarily had physical control of the USB, the data would not be
+secure. The other team would have access to the entire enviroment and could access our private and public ssh keys in the .ssh
+folder. The only solution to preventing this is if there was some access restriction or data encryption of the usb itself.
+
+2. gpg --verify does not really verify that you personally created the file in question because it only verifies that the public key
+and the signature of the file go along with each other. If the data was hijacked, modified, and signed with a different public key,
+the gpg --verify will still work as before. The best way to verify that the file was created by the original user would be to have a
+third party that maintains a record of the authors of all files. By doing this we can always look back and check the records to
+track the files origin.

@@ -1,0 +1,162 @@
+Gajan Nagara
+904937784
+Lab 7
+Assignment 4
+
+We begin this lab by downloading a copy of the buggy coreutils folder that is
+specified in the spec, and we extract it:
+wget web.cs.ucla.edu/classes/fall18/cs35L/assign/coreutils-with-bug.tar.gz
+tar -zxvf coreutils-with-bug.tar.gz
+
+Our next task is to configure and install coreutils so that we can test the
+buggy feature and hopefully fix it:
+cd coreutils-with-bug/
+./configure
+make
+
+When attempting to make coreutils, we get the following error:
+In file included from utimecmp.c:41:0:
+utimens.h:2:5: error: conflicting types for 'futimens'
+ int futimens (int, char const *, struct timespec const [2]);
+     ^
+In file included from utimecmp.h:25:0,
+                 from utimecmp.c:25:
+/usr/include/sys/stat.h:373:12: note: previous declaration of 'futimens' was
+here
+ extern int futimens (int __fd, const struct timespec __times[2]) __THROW;
+            ^
+The issue here is that there are two instances of futimens, each with there own
+set of parameters. This is obvisously not valid in C and thus results in a make
+error. To fix this we downlaod the patch file and install it ourselves: To fix
+this we downlaod the patch file and install it ourselves:
+wget web.cs.ucla.edu/classes/fall18/cs35L/assign/coreutils.diff
+patch -p0 < coreutils.diff
+
+This successfully patched the file and should fix the issue of a function with
+different parameters. The patch fixed the issue because it changed the futimens
+function with three parameters to coreutils_futimens. Now we can rebuild the
+coreutils:
+make
+
+Now we attempt to reproduce the bug issue:
+tmp=$(mktemp -d)
+cd $tmp
+touch -d '1918-11-11 11:00 GMT' wwi-armistice
+touch now
+sleep 1
+touch now1
+~/Desktop/cs35L/4/coreutils-with-bug/src/ls -lt --full-time wwi-armistice
+now now1
+
+This gave us the following output:
+-rw-r--r-- 1 gajan msugrad 0 1918-11-11 03:00:00.000000000 -0800 wwi-armistice
+-rw-r--r-- 1 gajan msugrad 0 2018-11-02 11:25:05.478242051 -0700 now1
+-rw-r--r-- 1 gajan msugrad 0 2018-11-02 11:24:56.350086080 -0700 now
+
+We can see that this is the incorrect output because it  mishandles files whose
+time stamps are very far in the past.
+
+Next we must attempt to debug this issue:
+gdb ~/Desktop/cs35L/4/coreutils-with-bug/src/ls
+info functions
+
+We see the following interesting functions that might give us an insight to the
+bug:
+static int compare_mtime(V, V);
+static int compare_atime(V, V);
+static int compare_ctime(V, V);
+
+We set breakpoints for these:
+break compare_mtime
+break compare_atime
+break compare_ctime
+
+We run it:
+run -lt --full-time wwi-armistice now now1
+
+And get to the following break point at compare_mtime and we inspect the locals
+as well as step through the function:
+list
+info local
+si
+info local
+
+When we do this we see the following function and local:'
+timespec_cmp (struct timespec a, struct timespec b)
+{
+  int diff = a.tv_sec - b.tv_sec;
+  return diff ? diff : a.tv_nsec - b.tv_nsec;
+}
+
+diff = 1541183105
+
+From this we can see that there is potential for an integer overflow in the
+code. This will obviously give us a unwanted output/behavior. We can also see
+that we get a very big output for the diff variable. This means that there is an
+integer overflow happening.
+
+Next we attempt to fix this bug, so we quit gdb:
+cd ~/Desktop/cs35L/4
+cp coreutils-with-bug/lib/timespec.h ./
+
+We edit timespec.h to change timespec_cmp to the following:
+timespec_cmp (struct timespec a, struct timespec b)
+{
+  if(a.tv_sec < b.tv_sec){
+    return 1;
+  }
+  else if (a.tv_sec < b.tv_sec){
+    return -1;
+  }
+  else {
+    return 0;
+  }
+}
+
+If we return a value of 1, 0, or -1 depending on if a>b, a is the same as b, or
+a<b then we can avoid the integer overflow issue while maintaining the same
+functionality. We then create and apply the patch:
+diff -u coreutils-with-bug/lib/timespec.h timespec.h > time.diff
+
+Then we make the ChangeLog:
+emacs
+C-x 4 a
+
+And we construct the lab4.diff by copying the ChangeLog and time.diff into one
+diff file. Then we apply the patch:
+cp lab4.diff coreutils-with-bug/
+cd coreutils-with-bug/
+
+I also replace all the paths in the diff file with "lib/timespec.h" and apply
+the patch:
+patch -p0 < lab4.diff
+
+We make coreutils with the patch to see if our fix worked:
+make
+cd $tmp
+~/Desktop/cs35L/4/coreutils-with-bug/src/ls -lt --full-time wwi-armistice now
+now1
+
+We now see the correct output, so the patch was successful:
+-rw-r--r-- 1 gajan msugrad 0 2018-11-02 12:05:47.328086935 -0700 now
+-rw-r--r-- 1 gajan msugrad 0 2018-11-02 12:05:56.600245991 -0700 now1
+-rw-r--r-- 1 gajan msugrad 0 1918-11-11 03:00:00.000000000 -0800 wwi-armistice
+
+As we can see this is the correct order. So we fixed the bug.
+
+Reproduce the problem in home directory on the SEASnet Linux servers:
+cd ~
+touch -d '1918-11-11 11:00 GMT' wwi-armistice
+touch now
+sleep 1
+touch now1
+TZ=UTC0 ls -lt --full-time wwi-armistice now now1
+
+We get the following output:
+-rw-r--r-- 1 gajan msugrad 0 2054-12-17 17:28:16.000000000 +0000 wwi-armistice
+-rw-r--r-- 1 gajan msugrad 0 2018-11-02 19:11:09.531505000 +0000 now1
+-rw-r--r-- 1 gajan msugrad 0 2018-11-02 19:10:59.971631000 +0000 now
+
+As we can see, the SEASnet server is wrong. The SEASnet server is not able
+process a ancient time. This is probably because the SEASnet server does not
+have enough bits to store the time/date.
